@@ -1,0 +1,217 @@
+#include "busServo.h"
+#include <MPU6050_tockn.h>
+#include <Wire.h>
+#include <PID_v1.h>
+#include "commandLine.h"
+#include <string.h>
+
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
+
+
+#define RXD2 16
+#define TXD2 17
+
+MPU6050 mpu6050(Wire);
+commandLine cmd;
+
+//PID variables
+static double SetpointY, InputY, OutputY1, OutputY2;
+static double SetpointX, InputX, OutputX1, OutputX2;
+//initial tuning parameters
+double Kp = 1, Ki = 0, Kd = 0;
+PID yPos(&InputY, &OutputY1, &SetpointY, Kp, Ki, Kd, REVERSE);
+PID yNeg(&InputY, &OutputY2, &SetpointY, Kp, Ki, Kd, DIRECT);
+PID xPos(&InputX, &OutputX1, &SetpointX, Kp, Ki, Kd, REVERSE);
+PID xNeg(&InputX, &OutputX2, &SetpointX, Kp, Ki, Kd, DIRECT);
+
+bool enable = true;
+bool toggle = true;
+
+void legButtons() {
+	for (uint8_t i = 3;i <= 8;i++) {
+		pinMode(i, INPUT_PULLUP);
+	}
+}
+
+// setup for PID
+void pidInit() {
+	SetpointY = 122;
+	SetpointX = 122;
+	xPos.SetMode(AUTOMATIC);
+	xPos.SetTunings(Kp, Ki, Kd);
+	xNeg.SetMode(AUTOMATIC);
+	xNeg.SetTunings(Kp, Ki, Kd);
+	yPos.SetMode(AUTOMATIC);
+	yPos.SetTunings(Kp, Ki, Kd);
+	yNeg.SetMode(AUTOMATIC);
+	yNeg.SetTunings(Kp, Ki, Kd);
+}
+
+// starts balancing algorithm for x axis
+void PidLoopX() {
+	mpu6050.update();
+	int angleX = mpu6050.getAngleZ();
+	Serial.print("x:  ");
+	Serial.print(angleX);
+	InputX = map(angleX, -45, 45, 0, 255);
+	xPos.Compute();
+	xNeg.Compute();
+	OutputX1 = map(OutputX1, 0, 255, 800, 400);
+	OutputX2 = map(OutputX2, 0, 255, 800, 400);
+	if (angleX < -5) {
+		move.pidHeightControl(3, 770, 450, OutputX2);
+		delay(50);
+		move.pidHeightControl(4, 770, 450, OutputX2);
+		delay(50);
+		move.pidHeightControl(1, 420, 100, OutputX2);
+		delay(50);
+		move.pidHeightControl(6, 420, 100, OutputX2);
+		delay(50);
+	}
+	else if (angleX > 5) {
+		move.pidHeightControl(3, 420, 100, OutputX1);
+		delay(50);
+		move.pidHeightControl(4, 420, 100, OutputX1);
+		delay(50);
+		move.pidHeightControl(1, 770, 450, OutputX1);
+		delay(50);
+		move.pidHeightControl(6, 770, 450, OutputX1);
+		delay(50);
+	}
+	else {
+		move.stopAll();
+		enable = true;
+	}
+}
+
+// starts balancing algorithm for Y axis
+void PidLoopY() {
+	mpu6050.update();
+	int angleY = -1 * mpu6050.getAngleY();
+	Serial.print("  y:  ");
+	Serial.println(angleY);
+	InputY = map(angleY, 0, 180, 0, 255);
+	yPos.Compute();
+	yNeg.Compute();
+	OutputY1 = map(OutputY1, 0, 255, 800, 400);
+	OutputY2 = map(OutputY2, 0, 255, 800, 400);
+	if (angleY < 75) {
+		move.pidHeightControl(1, 420, 100, OutputY2);
+		delay(50);
+		move.pidHeightControl(3, 420, 100, OutputY2);
+		delay(50);
+		move.pidHeightControl(2, 420, 100, OutputY2);
+		delay(50);
+		move.pidHeightControl(5, 770, 450, OutputY2);
+		delay(50);
+		move.pidHeightControl(4, 770, 450, OutputY2);
+		delay(50);
+		move.pidHeightControl(6, 770, 450, OutputY2);
+		delay(50);
+	}
+	else if (angleY > 85) {
+		move.pidHeightControl(5, 420, 100, OutputY1);
+		delay(50);
+		move.pidHeightControl(4, 420, 100, OutputY1);
+		delay(50);
+		move.pidHeightControl(6, 420, 100, OutputY1);
+		delay(50);
+		move.pidHeightControl(1, 770, 450, OutputY1);
+		delay(50);
+		move.pidHeightControl(3, 770, 450, OutputY1);
+		delay(50);
+		move.pidHeightControl(2, 770, 450, OutputY1);
+		delay(50);
+	}
+	else {
+		move.stopAll();
+		enable = false;
+	}
+}
+/*
+void remote() {
+	if (SerialBT.available()) {
+		BLUE blue;
+		blue.command = SerialBT.read();
+		Serial.println(blue.command);
+		if (blue.command == balance) {
+			toggle = false;
+		}
+		else if (toggle) {
+			if (blue.command == changeHeight) {
+				//blue.value = SerialBT.read();
+				Serial.println(SerialBT.read());
+			}
+			//move.processCommand(blue);
+		}
+		else if (blue.command == reset) {
+			ESP.restart();
+		}
+	}
+}
+*/
+void checkOnGround() {
+	for (int i = 3;i <= 8;i++) {
+		if (digitalRead(i) == HIGH) {
+			move.pidHeightControl(i - 2, 770, 400, 500);
+			delay(50);
+		}
+		while (digitalRead(i) == HIGH) {
+		}
+		move.stopAll();
+		delay(100);
+	}
+}
+
+/*
+void sendVin() {
+	if (millis() - saveTime > 3000) {
+		saveTime = millis();
+		int voltage = move.getVin();
+		if (voltage > 1000) {
+			uint8_t val = voltage/100;
+			SerialBT.write(val);
+		}
+	}
+}
+*/
+
+
+
+// begins serials on setup
+void begins() {
+	Serial.begin(115200);
+	Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
+	SerialBT.begin("HEX-HEX FRUIT"); //Bluetooth device name
+	Wire.begin();
+	mpu6050.begin();
+}
+
+void setup() {
+	begins();
+	move.intialPos(500, 420, 70);
+	delay(1000);
+	//legButtons();
+	mpu6050.calcGyroOffsets(true);
+	pidInit();
+}
+
+
+
+void loop() {
+	//checkOnGround();
+	cmd.sendVoltage();
+	cmd.recieveCommand();
+	delay(20);
+	if (!toggle) {
+		if (enable) {
+			PidLoopY();
+		}
+		else {
+			PidLoopX();
+		}
+	}
+}
