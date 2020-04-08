@@ -24,7 +24,7 @@ public:
 
 	//Methods
     void sendVoltage();
-	void recieveCommand();
+	//void recieveCommand();
 
 private:
 

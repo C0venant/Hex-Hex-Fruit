@@ -3,19 +3,21 @@
 #include <Wire.h>
 #include <PID_v1.h>
 #include "commandLine.h"
+//#include "BluetoothSerial.h"
+//#include "hexMove.h"
 #include <string.h>
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-
+//BluetoothSerial SerialBT;
 
 #define RXD2 16
 #define TXD2 17
 
 MPU6050 mpu6050(Wire);
-commandLine cmd;
+//hexMove move;
 
 //PID variables
 static double SetpointY, InputY, OutputY1, OutputY2;
@@ -29,6 +31,13 @@ PID xNeg(&InputX, &OutputX2, &SetpointX, Kp, Ki, Kd, DIRECT);
 
 bool enable = true;
 bool toggle = true;
+
+static int saveTime = 0;
+//incoming signals
+#define balance 53
+#define reset 58
+
+
 
 void legButtons() {
 	for (uint8_t i = 3;i <= 8;i++) {
@@ -63,23 +72,15 @@ void PidLoopX() {
 	OutputX2 = map(OutputX2, 0, 255, 800, 400);
 	if (angleX < -5) {
 		move.pidHeightControl(3, 770, 450, OutputX2);
-		delay(50);
 		move.pidHeightControl(4, 770, 450, OutputX2);
-		delay(50);
 		move.pidHeightControl(1, 420, 100, OutputX2);
-		delay(50);
 		move.pidHeightControl(6, 420, 100, OutputX2);
-		delay(50);
 	}
 	else if (angleX > 5) {
 		move.pidHeightControl(3, 420, 100, OutputX1);
-		delay(50);
 		move.pidHeightControl(4, 420, 100, OutputX1);
-		delay(50);
 		move.pidHeightControl(1, 770, 450, OutputX1);
-		delay(50);
 		move.pidHeightControl(6, 770, 450, OutputX1);
-		delay(50);
 	}
 	else {
 		move.stopAll();
@@ -100,72 +101,59 @@ void PidLoopY() {
 	OutputY2 = map(OutputY2, 0, 255, 800, 400);
 	if (angleY < 75) {
 		move.pidHeightControl(1, 420, 100, OutputY2);
-		delay(50);
 		move.pidHeightControl(3, 420, 100, OutputY2);
-		delay(50);
 		move.pidHeightControl(2, 420, 100, OutputY2);
-		delay(50);
 		move.pidHeightControl(5, 770, 450, OutputY2);
-		delay(50);
 		move.pidHeightControl(4, 770, 450, OutputY2);
-		delay(50);
 		move.pidHeightControl(6, 770, 450, OutputY2);
-		delay(50);
 	}
 	else if (angleY > 85) {
 		move.pidHeightControl(5, 420, 100, OutputY1);
-		delay(50);
 		move.pidHeightControl(4, 420, 100, OutputY1);
-		delay(50);
 		move.pidHeightControl(6, 420, 100, OutputY1);
-		delay(50);
 		move.pidHeightControl(1, 770, 450, OutputY1);
-		delay(50);
 		move.pidHeightControl(3, 770, 450, OutputY1);
-		delay(50);
 		move.pidHeightControl(2, 770, 450, OutputY1);
-		delay(50);
 	}
 	else {
 		move.stopAll();
 		enable = false;
 	}
 }
-/*
+
 void remote() {
 	if (SerialBT.available()) {
-		BLUE blue;
+		Blue blue;
 		blue.command = SerialBT.read();
+		Serial.print("command: ");
 		Serial.println(blue.command);
 		if (blue.command == balance) {
 			toggle = false;
 		}
 		else if (toggle) {
 			if (blue.command == changeHeight) {
-				//blue.value = SerialBT.read();
-				Serial.println(SerialBT.read());
+				blue.value = SerialBT.read();
+				Serial.print("new val: ");
+				Serial.println(blue.value);
 			}
-			//move.processCommand(blue);
+			move.processCommand(&blue);
 		}
 		else if (blue.command == reset) {
 			ESP.restart();
 		}
 	}
 }
-*/
+
 void checkOnGround() {
 	for (int i = 3;i <= 8;i++) {
 		if (digitalRead(i) == HIGH) {
 			move.pidHeightControl(i - 2, 770, 400, 500);
-			delay(50);
 		}
 		while (digitalRead(i) == HIGH) {
 		}
 		move.stopAll();
-		delay(100);
 	}
 }
-
 /*
 void sendVin() {
 	if (millis() - saveTime > 3000) {
@@ -179,8 +167,6 @@ void sendVin() {
 }
 */
 
-
-
 // begins serials on setup
 void begins() {
 	Serial.begin(115200);
@@ -192,8 +178,9 @@ void begins() {
 
 void setup() {
 	begins();
+	move.legSetup();
 	move.intialPos(500, 420, 70);
-	delay(1000);
+	delay(500);
 	//legButtons();
 	mpu6050.calcGyroOffsets(true);
 	pidInit();
@@ -203,8 +190,8 @@ void setup() {
 
 void loop() {
 	//checkOnGround();
-	cmd.sendVoltage();
-	cmd.recieveCommand();
+	//sendVin();
+	remote();
 	delay(20);
 	if (!toggle) {
 		if (enable) {

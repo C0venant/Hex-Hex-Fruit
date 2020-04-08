@@ -161,13 +161,13 @@ void busServo::LobotSerialServoUnload(HardwareSerial& SerialX, uint8_t id)
 int busServo::LobotSerialServoReceiveHandle(HardwareSerial& SerialX, byte* ret)
 {
 	bool frameStarted = false;
-	bool receiveFinished = false;
+	//bool receiveFinished = false;
 	byte frameCount = 0;
 	byte dataCount = 0;
 	byte dataLength = 2;
 	byte rxBuf;
 	byte recvBuf[32];
-	byte i;
+	//byte i;
 
 	while (SerialX.available()) {
 		rxBuf = SerialX.read();
@@ -217,6 +217,7 @@ int busServo::LobotSerialServoReceiveHandle(HardwareSerial& SerialX, byte* ret)
 			}
 		}
 	}
+	return -1;
 }
 
 

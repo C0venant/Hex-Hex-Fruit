@@ -39,9 +39,4 @@ private:
 
 };
 
-
-
-
-
-
 #endif

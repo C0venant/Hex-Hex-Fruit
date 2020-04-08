@@ -1,9 +1,8 @@
 #include "commandLine.h"
 
 static int saveTime = 0;
-bool toggle = true;
 
-commandLine::commandLine(bool massage = false){};
+commandLine::commandLine(bool massage){};
 
 void commandLine::sendVoltage(){
     if (millis() - saveTime > 3000) {
@@ -15,25 +14,3 @@ void commandLine::sendVoltage(){
 		}
 	}
 }
-
-void commandLine::recieveCommand(){
-	if (SerialBT.available()) {
-		BLUE blue;
-		blue.command = SerialBT.read();
-		Serial.println(blue.command);
-		if (blue.command == balance) {
-			toggle = false;
-		}
-		else if (toggle) {
-			if (blue.command == changeHeight) {
-				//blue.value = SerialBT.read();
-				Serial.println(SerialBT.read());
-			}
-			//move.processCommand(blue);
-		}
-		else if (blue.command == reset) {
-			ESP.restart();
-		}
-	}
-}
-
