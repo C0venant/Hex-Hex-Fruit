@@ -7,6 +7,16 @@
 #include "WProgram.h"
 #endif
 
+//command Array size
+#define comSize 10
+
+
+//initial position values
+#define initialUp 500
+#define initialMid 420
+#define initialDown 70
+
+
 //incoming signals
 #define inPose 54
 #define forward 50
@@ -29,21 +39,32 @@ struct Leg {
 	uint8_t down;
 };
 
+////////////////////////////////////////////
+typedef void (*cmdFunction)();
+struct command{
+	uint8_t id;
+	cmdFunction fun;
+};
+////////////////////////////////////////////
 class hexMove {
 public:
 	//Constructor
 	hexMove(bool massage = false);
-
+	uint8_t cSize = comSize;
+	command commands[comSize];
 	//Methods
 	void legSetup();
 	void stopAll();
-	void intialPos(int16_t pos3, int16_t pos2, int16_t pos1);
+	//void intialPos();
 	void pidHeightControl(uint8_t n, int16_t midPos, int16_t lowPos, uint16_t v);
 	int getVin();
 	void processCommand(Blue* blue);
+	//void waveHand();
+	void arrayInit();
+
 private:
-	void walking(uint8_t blue);
-	void waveHand();
+	//void walking(uint8_t blue);
+	
 	void changeH(int delta, uint16_t v);
 };
 

@@ -6,8 +6,6 @@
 static bool stepTurn = true;
 busServo servo;
 
-hexMove::hexMove(bool massage) {}
-
 struct legPos {
 	int up;
 	int mid;
@@ -16,7 +14,7 @@ struct legPos {
 
 Leg legs[6];
 
-void hexMove::legSetup(){
+hexMove::hexMove(bool massage) {
 	legs[0].up = 6;
 	legs[0].mid = 5;
 	legs[0].down = 4;
@@ -42,6 +40,33 @@ void hexMove::legSetup(){
 	legs[5].down= 7;
 }
 
+/*
+void hexMove::legSetup(){
+	legs[0].up = 6;
+	legs[0].mid = 5;
+	legs[0].down = 4;
+
+	legs[1].up= 15;
+	legs[1].mid= 14;
+	legs[1].down= 13;
+
+	legs[2].up = 18;
+	legs[2].mid = 17;
+	legs[2].down = 16;
+
+	legs[3].up = 12;
+	legs[3].mid = 11;
+	legs[3].down = 10;
+
+	legs[4].up = 3;
+	legs[4].mid = 2;
+	legs[4].down = 1;
+
+	legs[5].up = 9;
+	legs[5].mid = 8;
+	legs[5].down= 7;
+}
+*/
 static void getposition(uint8_t n, legPos* pos){
 	pos->down = -2048;
 	pos->mid = -2048;
@@ -87,7 +112,7 @@ void hexMove::changeH(int delta, uint16_t v) {
 		servo.serialMove(Serial2, legs[i].down, pos[i].down + delta, v);
 	}
 }
-
+/*
 static void stepCheck(int a, int b, int c) {
 	int one = digitalRead(a + 2);
 	int two = digitalRead(b + 2);
@@ -98,7 +123,7 @@ static void stepCheck(int a, int b, int c) {
 		three = digitalRead(c + 2);
 	}
 }
-
+*/
 ///////// this part of code contains helper functions for robot movement
 
 static void tripod1Up() {
@@ -214,6 +239,67 @@ static void sideWalk2(int sign){
 	tripod2Lean(sign*70);
 	tripod2Down();
 }
+
+
+void stepForward(){
+	if (stepTurn){
+		stepTurn = false;
+		step1(1);
+	}else{
+		stepTurn = true;
+		step2(1);
+	}
+}
+
+void stepBackward(){
+	if (stepTurn){
+		stepTurn = false;
+		step1(-1);
+	}else{
+		stepTurn = true;
+		step2(-1);
+	}
+}
+
+void turnLeft(){
+	if (stepTurn){
+		stepTurn = false;
+		turn1(-1);
+	}else{
+		stepTurn = true;
+		turn2(-1);
+	}
+}
+
+void turnRight(){
+	if (stepTurn){
+		stepTurn = false;
+		turn1(1);
+	}else{
+		stepTurn = true;
+		turn2(1);
+	}
+}
+
+void sideWalkLeft(){
+	if (stepTurn){
+		stepTurn = false;
+		sideWalk1(1);
+	}else{
+		stepTurn = true;
+		sideWalk2(-1);
+	}
+}
+
+void sideWalkRight(){
+	if (stepTurn){
+		stepTurn = false;
+		sideWalk1(-1);
+	}else{
+		stepTurn = true;
+		sideWalk2(1);
+	}
+}
 ////////////////////////////////////////////
 
 // changes Height of legs for Pid
@@ -228,7 +314,7 @@ void hexMove::stopAll() {
 	}
 }
 
-void hexMove::waveHand() {
+void waveHand() {
 	servo.serialMove(Serial2, legs[0].mid, 200, 400);
 	delay(100);
 	servo.serialMove(Serial2, legs[0].down, 400, 400);
@@ -239,18 +325,19 @@ void hexMove::waveHand() {
 	delay(10);
 }
 
-void hexMove::intialPos(int16_t pos3, int16_t pos2, int16_t pos1) {
+void intialPos() {
 	for (int i = 3;i < 19;i += 3) {
-		servo.serialMove(Serial2, i, pos3, 600);
+		servo.serialMove(Serial2, i, initialUp, 600);
 	}
 	for (int i = 2;i < 18;i += 3) {
-		servo.serialMove(Serial2, i, pos2, 600);
+		servo.serialMove(Serial2, i, initialMid, 600);
 	}
 	for (int i = 1;i < 18; i += 3) {
-		servo.serialMove(Serial2, i, pos1, 600);
+		servo.serialMove(Serial2, i, initialDown, 600);
 	}
 }
 
+/*
 void hexMove::walking(uint8_t blue) {
 	if (forward == blue) {
 		if (stepTurn) {
@@ -311,6 +398,7 @@ void hexMove::walking(uint8_t blue) {
 	}
 }
 
+
 void hexMove::processCommand(Blue* blue) {
 	if (blue->command >= 47 && blue->command <= 54) {
 		walking(blue->command);
@@ -323,7 +411,20 @@ void hexMove::processCommand(Blue* blue) {
 	}
 	
 }
+*/
 
 int hexMove::getVin() {
 	return servo.LobotSerialServoReadVin(Serial2, 1);
+}
+
+
+void hexMove::arrayInit(){
+	commands[0] = {wave, waveHand};
+	commands[1] = {forward , stepForward};
+	commands[2] = {backwards, stepBackward};
+	commands[3] = {right, turnRight};
+	commands[4] = {left, turnLeft};
+	commands[5] = {rightSideWalk, sideWalkRight};
+	commands[6] = {leftSideWalk, sideWalkLeft};
+	commands[7] = {inPose, intialPos};
 }

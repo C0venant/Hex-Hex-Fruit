@@ -3,21 +3,23 @@
 #include <Wire.h>
 #include <PID_v1.h>
 #include "commandLine.h"
-//#include "BluetoothSerial.h"
-//#include "hexMove.h"
 #include <string.h>
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-//BluetoothSerial SerialBT;
+//class objects
+BluetoothSerial SerialBT;
+MPU6050 mpu6050(Wire);
+commandLine cmd;
+//hexMove move;
 
+
+//constants
 #define RXD2 16
 #define TXD2 17
 
-MPU6050 mpu6050(Wire);
-//hexMove move;
 
 //PID variables
 static double SetpointY, InputY, OutputY1, OutputY2;
@@ -29,15 +31,8 @@ PID yNeg(&InputY, &OutputY2, &SetpointY, Kp, Ki, Kd, DIRECT);
 PID xPos(&InputX, &OutputX1, &SetpointX, Kp, Ki, Kd, REVERSE);
 PID xNeg(&InputX, &OutputX2, &SetpointX, Kp, Ki, Kd, DIRECT);
 
+//pid switch
 bool enable = true;
-bool toggle = true;
-
-static int saveTime = 0;
-//incoming signals
-#define balance 53
-#define reset 58
-
-
 
 void legButtons() {
 	for (uint8_t i = 3;i <= 8;i++) {
@@ -58,7 +53,7 @@ void pidInit() {
 	yNeg.SetMode(AUTOMATIC);
 	yNeg.SetTunings(Kp, Ki, Kd);
 }
-
+/*
 // starts balancing algorithm for x axis
 void PidLoopX() {
 	mpu6050.update();
@@ -120,7 +115,8 @@ void PidLoopY() {
 		enable = false;
 	}
 }
-
+*/
+/*
 void remote() {
 	if (SerialBT.available()) {
 		Blue blue;
@@ -143,7 +139,9 @@ void remote() {
 		}
 	}
 }
+*/
 
+/*
 void checkOnGround() {
 	for (int i = 3;i <= 8;i++) {
 		if (digitalRead(i) == HIGH) {
@@ -154,6 +152,8 @@ void checkOnGround() {
 		move.stopAll();
 	}
 }
+*/
+
 /*
 void sendVin() {
 	if (millis() - saveTime > 3000) {
@@ -178,8 +178,8 @@ void begins() {
 
 void setup() {
 	begins();
-	move.legSetup();
-	move.intialPos(500, 420, 70);
+	//move.legSetup();
+	cmd.executeCommand(inPose);
 	delay(500);
 	//legButtons();
 	mpu6050.calcGyroOffsets(true);
@@ -190,9 +190,10 @@ void setup() {
 
 void loop() {
 	//checkOnGround();
-	//sendVin();
-	remote();
+	cmd.sendVoltage(SerialBT);
+	cmd.recieveCommand(SerialBT);
 	delay(20);
+	/*
 	if (!toggle) {
 		if (enable) {
 			PidLoopY();
@@ -201,4 +202,5 @@ void loop() {
 			PidLoopX();
 		}
 	}
+	*/
 }

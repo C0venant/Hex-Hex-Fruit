@@ -7,15 +7,14 @@
 #include "WProgram.h"
 #endif
 
-#include "BluetoothSerial.h"
 #include "hexMove.h"
-BluetoothSerial SerialBT;
-hexMove move;
+#include "BluetoothSerial.h"
 
 
 //incoming signals
 #define balance 53
 #define reset 58
+
 
 class commandLine {
 public:
@@ -23,10 +22,13 @@ public:
 	commandLine(bool massage = false);
 
 	//Methods
-    void sendVoltage();
-	//void recieveCommand();
+	void functionsInit();
+	void executeCommand(uint8_t id);
+    void sendVoltage(BluetoothSerial& SerialBT);
+	void recieveCommand(BluetoothSerial& SerialBT);
 
 private:
+	
 
 };
 #endif
