@@ -10,10 +10,18 @@ commandLine::commandLine(bool massage){
 };
 
 void commandLine::executeCommand(uint8_t id){
-	Serial.println(id);
 	for(int i = 0; i < move.cSize; i++){
 		if(move.commands[i].id == id){
 			move.commands[i].fun();
+			break;
+		}
+	}
+}
+
+void commandLine::executePidCommand(uint8_t id, uint16_t v){
+	for(int i = 0; i < move.cSize; i++){
+		if(move.pidCommands[i].id == id){
+			move.pidCommands[i].fun(v);
 			break;
 		}
 	}

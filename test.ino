@@ -4,6 +4,7 @@
 #include <PID_v1.h>
 #include "commandLine.h"
 #include <string.h>
+#include "pid.h"
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -11,15 +12,16 @@
 
 //class objects
 BluetoothSerial SerialBT;
-MPU6050 mpu6050(Wire);
+//MPU6050 mpu6050(Wire);
 commandLine cmd;
 //hexMove move;
 
-
+pid p;
 //constants
 #define RXD2 16
 #define TXD2 17
 
+/*
 
 //PID variables
 static double SetpointY, InputY, OutputY1, OutputY2;
@@ -34,12 +36,15 @@ PID xNeg(&InputX, &OutputX2, &SetpointX, Kp, Ki, Kd, DIRECT);
 //pid switch
 bool enable = true;
 
+*/
+
 void legButtons() {
 	for (uint8_t i = 3;i <= 8;i++) {
 		pinMode(i, INPUT_PULLUP);
 	}
 }
 
+/*
 // setup for PID
 void pidInit() {
 	SetpointY = 122;
@@ -53,6 +58,7 @@ void pidInit() {
 	yNeg.SetMode(AUTOMATIC);
 	yNeg.SetTunings(Kp, Ki, Kd);
 }
+*/
 /*
 // starts balancing algorithm for x axis
 void PidLoopX() {
@@ -116,30 +122,7 @@ void PidLoopY() {
 	}
 }
 */
-/*
-void remote() {
-	if (SerialBT.available()) {
-		Blue blue;
-		blue.command = SerialBT.read();
-		Serial.print("command: ");
-		Serial.println(blue.command);
-		if (blue.command == balance) {
-			toggle = false;
-		}
-		else if (toggle) {
-			if (blue.command == changeHeight) {
-				blue.value = SerialBT.read();
-				Serial.print("new val: ");
-				Serial.println(blue.value);
-			}
-			move.processCommand(&blue);
-		}
-		else if (blue.command == reset) {
-			ESP.restart();
-		}
-	}
-}
-*/
+
 
 /*
 void checkOnGround() {
@@ -154,36 +137,21 @@ void checkOnGround() {
 }
 */
 
-/*
-void sendVin() {
-	if (millis() - saveTime > 3000) {
-		saveTime = millis();
-		int voltage = move.getVin();
-		if (voltage > 1000) {
-			uint8_t val = voltage/100;
-			SerialBT.write(val);
-		}
-	}
-}
-*/
-
 // begins serials on setup
 void begins() {
 	Serial.begin(115200);
 	Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
 	SerialBT.begin("HEX-HEX FRUIT"); //Bluetooth device name
 	Wire.begin();
-	mpu6050.begin();
+	//mpu6050.begin();
 }
 
 void setup() {
 	begins();
-	//move.legSetup();
 	cmd.executeCommand(inPose);
 	delay(500);
-	//legButtons();
-	mpu6050.calcGyroOffsets(true);
-	pidInit();
+	//mpu6050.calcGyroOffsets(true);
+	//pidInit();
 }
 
 

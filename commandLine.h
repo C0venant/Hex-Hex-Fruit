@@ -24,6 +24,7 @@ public:
 	//Methods
 	void functionsInit();
 	void executeCommand(uint8_t id);
+	void executePidCommand(uint8_t id, uint16_t v);
     void sendVoltage(BluetoothSerial& SerialBT);
 	void recieveCommand(BluetoothSerial& SerialBT);
 

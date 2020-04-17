@@ -40,33 +40,6 @@ hexMove::hexMove(bool massage) {
 	legs[5].down= 7;
 }
 
-/*
-void hexMove::legSetup(){
-	legs[0].up = 6;
-	legs[0].mid = 5;
-	legs[0].down = 4;
-
-	legs[1].up= 15;
-	legs[1].mid= 14;
-	legs[1].down= 13;
-
-	legs[2].up = 18;
-	legs[2].mid = 17;
-	legs[2].down = 16;
-
-	legs[3].up = 12;
-	legs[3].mid = 11;
-	legs[3].down = 10;
-
-	legs[4].up = 3;
-	legs[4].mid = 2;
-	legs[4].down = 1;
-
-	legs[5].up = 9;
-	legs[5].mid = 8;
-	legs[5].down= 7;
-}
-*/
 static void getposition(uint8_t n, legPos* pos){
 	pos->down = -2048;
 	pos->mid = -2048;
@@ -301,18 +274,52 @@ void sideWalkRight(){
 	}
 }
 ////////////////////////////////////////////
-
+////this part of code contains functions for pid balance
 // changes Height of legs for Pid
-void hexMove::pidHeightControl(uint8_t n, int16_t midPos, int16_t lowPos, uint16_t v) {
+void pidHeightControl(uint8_t n, int16_t midPos, int16_t lowPos, uint16_t v) {
 	servo.serialMove(Serial2, legs[n-1].mid, midPos, v);
 	servo.serialMove(Serial2, legs[n-1].down, lowPos, v);
 }
 
-void hexMove::stopAll() {
+void stopAll() {
 	for (uint8_t i = 1;i <= 18;i++) {
 		servo.serialStop(Serial2, i);
 	}
 }
+
+void pidCaseLowX(uint16_t output){
+	pidHeightControl(3, 770, 450, output);
+	pidHeightControl(4, 770, 450, output);
+	pidHeightControl(1, 420, 100, output);
+	pidHeightControl(6, 420, 100, output);
+}
+
+void pidCaseHighX(uint16_t output){
+	pidHeightControl(3, 420, 100, output);
+	pidHeightControl(4, 420, 100, output);
+	pidHeightControl(1, 770, 450, output);
+	pidHeightControl(6, 770, 450, output);
+}
+
+void pidCaseLowY(uint16_t output){
+	pidHeightControl(1, 420, 100, output);
+	pidHeightControl(3, 420, 100, output);
+	pidHeightControl(2, 420, 100, output);
+	pidHeightControl(5, 770, 450, output);
+	pidHeightControl(4, 770, 450, output);
+	pidHeightControl(6, 770, 450, output);
+}
+
+void pidCaseHighY(uint16_t output){
+	pidHeightControl(5, 420, 100, output);
+	pidHeightControl(4, 420, 100, output);
+	pidHeightControl(6, 420, 100, output);
+	pidHeightControl(1, 770, 450, output);
+	pidHeightControl(3, 770, 450, output);
+	pidHeightControl(2, 770, 450, output);
+}
+
+//////////////////////////////////////////////////
 
 void waveHand() {
 	servo.serialMove(Serial2, legs[0].mid, 200, 400);
@@ -337,81 +344,6 @@ void intialPos() {
 	}
 }
 
-/*
-void hexMove::walking(uint8_t blue) {
-	if (forward == blue) {
-		if (stepTurn) {
-			stepTurn = false;
-			step1(1);
-		}else {
-			stepTurn = true;
-			step2(1);
-		}
-	}
-	else if (right == blue) {
-		if (stepTurn) {
-			stepTurn = false;
-			turn1(1);
-		}else {
-			stepTurn = true;
-			turn2(1);
-		}
-	}
-	else if (left == blue) {
-		if (stepTurn) {
-			stepTurn = false;
-			turn1(-1);
-		}else {
-			stepTurn = true;
-			turn2(-1);
-		}
-	}
-	else if (backwards == blue) {
-		if (stepTurn) {
-			stepTurn = false;
-			step1(-1);
-		}else {
-			stepTurn = true;
-			step2(-1);
-		}
-	}
-	else if (inPose == blue) {
-		intialPos(500, 420, 70);
-	}
-	else if (rightSideWalk == blue){
-		if (stepTurn) {
-			stepTurn = false;
-			sideWalk1(-1);
-		}else {
-			stepTurn = true;
-			sideWalk2(1);
-		}
-	}
-	else if (leftSideWalk == blue){
-		if (stepTurn) {
-			stepTurn = false;
-			sideWalk1(1);
-		}else {
-			stepTurn = true;
-			sideWalk2(-1);
-		}
-	}
-}
-
-
-void hexMove::processCommand(Blue* blue) {
-	if (blue->command >= 47 && blue->command <= 54) {
-		walking(blue->command);
-	}
-	else if (wave == blue->command) {
-		waveHand();
-	}
-	else if (changeHeight == blue->command) {
-		changeH(blue->value*2, 500);
-	}
-	
-}
-*/
 
 int hexMove::getVin() {
 	return servo.LobotSerialServoReadVin(Serial2, 1);
@@ -427,4 +359,11 @@ void hexMove::arrayInit(){
 	commands[5] = {rightSideWalk, sideWalkRight};
 	commands[6] = {leftSideWalk, sideWalkLeft};
 	commands[7] = {inPose, intialPos};
+	commands[8] = {stop, stopAll};
+
+	pidCommands[0] = {lowX, pidCaseLowX};
+	pidCommands[1] = {lowY, pidCaseLowY};
+	pidCommands[2] = {highX, pidCaseHighX};
+	pidCommands[3] = {highY, pidCaseHighY};
+
 }
