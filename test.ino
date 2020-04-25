@@ -16,7 +16,7 @@ BluetoothSerial SerialBT;
 commandLine cmd;
 //hexMove move;
 
-pid p;
+//pid p;
 //constants
 #define RXD2 16
 #define TXD2 17

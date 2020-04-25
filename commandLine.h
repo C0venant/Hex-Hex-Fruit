@@ -27,6 +27,7 @@ public:
 	void executePidCommand(uint8_t id, uint16_t v);
     void sendVoltage(BluetoothSerial& SerialBT);
 	void recieveCommand(BluetoothSerial& SerialBT);
+	void loopCommand();
 
 private:
 	
