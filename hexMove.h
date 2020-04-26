@@ -35,11 +35,6 @@
 #define highX 3
 #define highY 4
 
-struct Blue {
-	uint8_t command;
-	int8_t value;
-};
-
 struct Leg {
 	uint8_t up;
 	uint8_t mid;
@@ -71,7 +66,6 @@ public:
 	//void stopAll();
 	void pidHeightControl(uint8_t n, int16_t midPos, int16_t lowPos, uint16_t v);
 	int getVin();
-	void processCommand(Blue* blue);
 	void arrayInit();
 
 private:

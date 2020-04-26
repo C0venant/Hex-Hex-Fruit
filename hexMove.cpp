@@ -4,15 +4,15 @@
 #define delayCoef 100
 
 static bool stepTurn = true;
-busServo servo;
+static busServo servo;
 
 struct legPos {
 	int up;
 	int mid;
 	int down;
 };
-
-Leg legs[6];
+ 
+static Leg legs[6];
 
 hexMove::hexMove(bool massage) {
 	legs[0].up = 6;
