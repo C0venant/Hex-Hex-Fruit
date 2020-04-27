@@ -7,13 +7,14 @@
 #include "WProgram.h"
 #endif
 
-#include "hexMove.h"
+
+#include "quadMove.h"
 #include "BluetoothSerial.h"
 
 
 //incoming signals
 #define balance 53
-#define reset 58
+#define reset 60
 
 
 class commandLine {

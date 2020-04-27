@@ -13,14 +13,15 @@ static int WalkMode = hexMode;
 uint8_t lastCommand = nullCommand;
 static int lastCommandTime = 0;
 static int saveTime = 0;
-static bool toggle = true;
 static hexMove move;
+static quadMove qmove;
 static uint8_t rCommand = 0;
 
 
 // constructor
 commandLine::commandLine(bool massage){
 	move.arrayInit();
+	qmove.arrayInit();
 };
 
 // executes basic commands
@@ -34,7 +35,12 @@ void commandLine::executeCommand(uint8_t id){
 			}
 		}
 	}else{
-		Serial.println("Hello quad Mode");
+		for(int i = 0; i < qArrSize; i++){
+			if(qmove.commands[i].id == id){
+				qmove.commands[i].fun();
+				break;
+			}
+		}
 	}
 }
 
@@ -79,7 +85,10 @@ void commandLine::loopCommand(){
 }
 
 
-
+void transform(){
+	WalkMode = rCommand;
+	lastCommand = nullCommand;
+}
 
 // recieves incoming signal and calls method executioner
 
@@ -88,8 +97,7 @@ void commandLine::recieveCommand(BluetoothSerial& SerialBT){
 		rCommand = SerialBT.read();
 		display(rCommand);
 		if(rCommand == hexMode || rCommand == quadMode){
-			WalkMode = rCommand;
-			lastCommand = nullCommand;
+			transform();
 			return;
 		}
 		lastCommand = rCommand;
