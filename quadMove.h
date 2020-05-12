@@ -27,6 +27,7 @@
 #define narrowArm 48
 #define changeAngleUp 58
 #define changeAngleDown 59
+#define quadForward 50
 
 
 #define qArrSize 10 
