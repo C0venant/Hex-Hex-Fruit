@@ -9,7 +9,7 @@
 
 //command Array size
 #define comSize 10
-#define pidComSize 5
+#define pidComSize 4
 
 //initial position values
 #define initialUp 500

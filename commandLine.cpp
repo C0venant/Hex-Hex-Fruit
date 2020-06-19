@@ -17,11 +17,17 @@ static hexMove move;
 static quadMove qmove;
 static uint8_t rCommand = 0;
 
+bool balanceEnabled = true;
+
 
 // constructor
 commandLine::commandLine(bool massage){
 	move.arrayInit();
 	qmove.arrayInit();
+};
+
+bool commandLine::balanceStatus(){
+	return balanceEnabled;
 };
 
 // executes basic commands
