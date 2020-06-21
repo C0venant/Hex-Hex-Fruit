@@ -8,8 +8,8 @@
 #endif
 
 //command Array size
-#define comSize 10
-#define pidComSize 4
+#define comSize 12
+#define pidComSize 5
 
 //initial position values
 #define initialUp 500
@@ -24,7 +24,8 @@
 #define left 49
 #define backwards 52
 #define wave 56
-#define changeHeight 57
+#define changeHeightInc 57
+#define changeHeightDec 58
 #define rightSideWalk 47
 #define leftSideWalk 48
 #define stop 40

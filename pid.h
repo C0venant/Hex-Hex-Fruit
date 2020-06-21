@@ -19,6 +19,7 @@ public:
 	pid(bool massage = false);
 	//Methods
     void pidBalance();
+	void printConrdinates();
 	void begin();
 private:
 	

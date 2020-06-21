@@ -3,6 +3,8 @@
 
 #define delayCoef 100
 
+#define heightDelta 50
+
 static bool stepTurn = true;
 static busServo servo;
 
@@ -43,16 +45,18 @@ hexMove::hexMove(bool massage) {
 static void getposition(uint8_t n, legPos* pos){
 	pos->down = -2048;
 	pos->mid = -2048;
-	pos->up = -2048;
+	//pos->up = -2048;
 	while(pos->down == -2048){
 		pos->down = servo.serialPos(Serial2, legs[n-1].down);
 	}
 	while(pos->mid == -2048){
 		pos->mid = servo.serialPos(Serial2, legs[n-1].mid);
 	}
+	/*
 	while(pos->up == -2048){
 		pos->up = servo.serialPos(Serial2, legs[n-1].up);
 	}	
+	*/
 }
 
 static void liftUp(uint8_t n, int16_t pos) {
@@ -75,6 +79,7 @@ static void lean(uint8_t n, int16_t midpos, int16_t downpos){
 }
 
 //change height of the body according to delta
+//this is old one with status bar
 void hexMove::changeH(int delta, uint16_t v) {
 	legPos pos[6];
 	for (uint8_t i = 0; i < 6; i++){
@@ -83,6 +88,33 @@ void hexMove::changeH(int delta, uint16_t v) {
 	for (uint8_t i = 0; i < 6; i++){
 		servo.serialMove(Serial2, legs[i].mid, pos[i].mid + delta, v);
 		servo.serialMove(Serial2, legs[i].down, pos[i].down + delta, v);
+	}
+}
+
+//new ones with buttons
+
+void changeHInc() {
+	legPos pos[6];
+	//for the time being lets get from only one
+	for (uint8_t i = 0; i < 1; i++){
+		getposition(i+1, &pos[i]);
+	}
+	for (uint8_t i = 0; i < 6; i++){
+		servo.serialMove(Serial2, legs[i].mid, pos[0].mid +  heightDelta, 300);
+		servo.serialMove(Serial2, legs[i].down, pos[0].down +  heightDelta, 300);
+	}
+}
+
+
+void changeHDec() {
+	legPos pos[6];
+	//for the time being lets get from only one
+	for (uint8_t i = 0; i < 1; i++){
+		getposition(i+1, &pos[i]);
+	}
+	for (uint8_t i = 0; i < 6; i++){
+		servo.serialMove(Serial2, legs[i].mid, pos[0].mid -  heightDelta, 300);
+		servo.serialMove(Serial2, legs[i].down, pos[0].down -  heightDelta, 300);
 	}
 }
 /*
@@ -360,6 +392,9 @@ void hexMove::arrayInit(){
 	commands[6] = {leftSideWalk, sideWalkLeft};
 	commands[7] = {inPose, intialPos};
 	commands[8] = {stop, stopAll};
+	commands[9] = {changeHeightInc, changeHInc};
+	commands[10] = {changeHeightDec, changeHDec};
+
 
 	pidCommands[0] = {lowX, pidCaseLowX};
 	pidCommands[1] = {lowY, pidCaseLowY};

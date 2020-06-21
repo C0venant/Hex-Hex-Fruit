@@ -158,9 +158,9 @@ void setup() {
 
 void loop() {
 	//checkOnGround();
-	//if(cmd.balanceStatus()){
-	//	p.pidBalance();
-	//}
+	if(cmd.balanceStatus()){
+		p.printConrdinates();
+	}
 	cmd.sendVoltage(SerialBT);
 	cmd.recieveCommand(SerialBT);
 	delay(20);

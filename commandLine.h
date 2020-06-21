@@ -16,6 +16,9 @@
 #define balance 53
 #define reset 60
 
+#define hexMode 31
+#define quadMode 30
+
 
 class commandLine {
 public:

@@ -84,6 +84,16 @@ void PidLoopY() {
 	}
 }
 
+void pid::printConrdinates(){
+	mpu6050.update();
+	Serial.print("  x:  ");
+	Serial.print(mpu6050.getAngleX());
+	Serial.print("  y:  ");
+	Serial.print(mpu6050.getAngleY());
+	Serial.print("  z:  ");
+	Serial.println(mpu6050.getAngleZ());
+	delay(300);
+}
 
 void pid::pidBalance(){
 	if (enable) {
