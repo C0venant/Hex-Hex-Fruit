@@ -42,7 +42,7 @@ hexMove::hexMove(bool massage) {
 	legs[5].down= 7;
 }
 
-static void getposition(uint8_t n, legPos* pos){
+void getposition(uint8_t n, legPos* pos){
 	pos->down = -2048;
 	pos->mid = -2048;
 	//pos->up = -2048;
@@ -59,21 +59,21 @@ static void getposition(uint8_t n, legPos* pos){
 	*/
 }
 
-static void liftUp(uint8_t n, int16_t pos) {
+void liftUp(uint8_t n, int16_t pos) {
 	servo.serialMove(Serial2, legs[n-1].mid, pos, 200);
 
 }
-static void liftDown(uint8_t n, int16_t pos) {
+void liftDown(uint8_t n, int16_t pos) {
 	servo.serialMove(Serial2, legs[n-1].mid, pos, 200);
 }
 
 
 // pushes body in horizontal direction
-static void horPush(uint8_t n, int16_t pos) {
+void horPush(uint8_t n, int16_t pos) {
 	servo.serialMove(Serial2, legs[n-1].up, pos, 200);
 }
 
-static void lean(uint8_t n, int16_t midpos, int16_t downpos){
+void lean(uint8_t n, int16_t midpos, int16_t downpos){
 	//servo.serialMove(Serial2, legs[n-1].mid, midpos, 200);
 	servo.serialMove(Serial2, legs[n-1].down, downpos, 200);
 }
@@ -131,66 +131,66 @@ static void stepCheck(int a, int b, int c) {
 */
 ///////// this part of code contains helper functions for robot movement
 
-static void tripod1Up() {
-	liftUp(1, 300);
-	liftUp(3, 300);
-	liftUp(5, 300);
+void tripod1Up(int pos) {
+	liftUp(1, pos);
+	liftUp(3, pos);
+	liftUp(5, pos);
 	delay(delayCoef);
 }
-static void tripod2Up() {
-	liftUp(2, 300);
-	liftUp(4, 300);
-	liftUp(6, 300);
+void tripod2Up(int pos) {
+	liftUp(2, pos);
+	liftUp(4, pos);
+	liftUp(6, pos);
 	delay(delayCoef);
 }
-static void tripod1Down() {
-	liftDown(1, 420);
-	liftDown(3, 420);
-	liftDown(5, 420);
+void tripod1Down(int pos) {
+	liftDown(1, pos);
+	liftDown(3, pos);
+	liftDown(5, pos);
 	delay(delayCoef);
 }
-static void tripod2Down() {
-	liftDown(2, 420);
-	liftDown(4, 420);
-	liftDown(6, 420);
+void tripod2Down(int pos) {
+	liftDown(2, pos);
+	liftDown(4, pos);
+	liftDown(6, pos);
 	delay(delayCoef);
 }
-static void tripod1Push(int16_t pos) {
+void tripod1Push(int16_t pos) {
 	horPush(1, 500 - pos);
 	horPush(3, 500 - pos);
 	horPush(5, 500 + pos);
 	delay(delayCoef);
 }
-static void tripod2Push(int16_t pos) {
+void tripod2Push(int16_t pos) {
 	horPush(2, 500 - pos);
 	horPush(4, 500 + pos);
 	horPush(6, 500 + pos);
 	delay(delayCoef);
 }
-static void tripod1Turn(int16_t pos) {
+void tripod1Turn(int16_t pos) {
 	horPush(1, 500 - pos);
 	horPush(3, 500 - pos);
 	horPush(5, 500 - pos);
 	delay(delayCoef);
 }
-static void tripod2Turn(int16_t pos) {
+void tripod2Turn(int16_t pos) {
 	horPush(2, 500 - pos);
 	horPush(4, 500 - pos);
 	horPush(6, 500 - pos);
 	delay(delayCoef);
 }
 
-static void tripod1Lean(int16_t pos){
-	lean(1,0,70+pos);
-	lean(3,0,70+pos);
-	lean(5,0,70-pos);
+void tripod1Lean(int initial,int16_t pos){
+	lean(1,0,initial+pos);
+	lean(3,0,initial+pos);
+	lean(5,0,initial-pos);
 	delay(delayCoef);
 }
 
-static void tripod2Lean(int16_t pos){
-	lean(2,0,70-pos);
-	lean(4,0,70+pos);
-	lean(6,0,70+pos);
+void tripod2Lean(int initial,int16_t pos){
+	lean(2,0,initial-pos);
+	lean(4,0,initial+pos);
+	lean(6,0,initial+pos);
 	delay(delayCoef);
 }
 ///////////////////////////////////////////////////
@@ -198,51 +198,63 @@ static void tripod2Lean(int16_t pos){
 ///////////// this segment of code contains main functions for robot movement
 
 // tripod1 step takes 1 for forward and -1 for backwards motion
-static void step1(int sign) {
-	tripod1Up();
+void step1(int sign) {
+	legPos pos[1];
+	getposition(1, &pos[0]);
+	tripod1Up(pos[0].mid-120);
 	tripod2Push(0);
 	tripod1Push(sign * 150);
-	tripod1Down();
+	tripod1Down(pos[0].mid);
 	//stepCheck (1,3,5);   
 }
 
 // tripod2 step takes 1 for forward and -1 for backwards motion
-static void step2(int sign) {
-	tripod2Up();
+void step2(int sign) {
+	legPos pos[1];
+	getposition(2, &pos[0]);
+	tripod2Up(pos[0].mid-120);
 	tripod1Push(0);
 	tripod2Push(sign * 150);
-	tripod2Down();
+	tripod2Down(pos[0].mid);
 	//stepCheck (2,4,6);   
 }
 //tripod1 turn 
-static void turn1(int sign) {
-	tripod1Up();
+void turn1(int sign) {
+	legPos pos[1];
+	getposition(1, &pos[0]);
+	tripod1Up(pos[0].mid-120);
 	tripod2Turn(0);
 	tripod1Turn(sign * 150);
-	tripod1Down();
+	tripod1Down(pos[0].mid);
 	//stepCheck (1,3,5);   
 }
 //tripod2 turn
-static void turn2(int sign) {
-	tripod2Up();
+void turn2(int sign) {
+	legPos pos[1];
+	getposition(2, &pos[0]);
+	tripod2Up(pos[0].mid-120);
 	tripod1Turn(0);
 	tripod2Turn(sign * 150);
-	tripod2Down();
+	tripod2Down(pos[0].mid);
 	//stepCheck (2,4,6);      
 }
 //walk sideways
-static void sideWalk1(int sign){
-	tripod1Up();
-	tripod2Lean(0);
-	tripod1Lean(sign*70);
-	tripod1Down();
+void sideWalk1(int sign){
+	legPos pos[1];
+	getposition(1, &pos[0]);
+	tripod1Up(pos[0].mid-120);
+	tripod2Lean(pos[0].down,0);
+	tripod1Lean(pos[0].down,sign*70);
+	tripod1Down(pos[0].mid);
 }
 
 static void sideWalk2(int sign){
-	tripod2Up();
-	tripod1Lean(0);
-	tripod2Lean(sign*70);
-	tripod2Down();
+	legPos pos[1];
+	getposition(2, &pos[0]);
+	tripod2Up(pos[0].mid-120);
+	tripod1Lean(pos[0].down,0);
+	tripod2Lean(pos[0].down,sign*70);
+	tripod2Down(pos[0].mid);
 }
 
 

@@ -50,10 +50,10 @@ void PidLoopY() {
 	OutputY1 = map(OutputY1, 0, 255, 800, 400);
 	OutputY2 = map(OutputY2, 0, 255, 800, 400);
 	if (angleY < 75) {
-		pidCmd.executePidCommand(lowY, OutputY1);
+		pidCmd.executePidCommand(lowY, OutputY2);
 	}
 	else if (angleY > 95) {
-        pidCmd.executePidCommand(highY, OutputY2);
+        pidCmd.executePidCommand(highY, OutputY1);
 	}
 	else {
 		pidCmd.executeCommand(stop);
