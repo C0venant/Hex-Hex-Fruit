@@ -319,21 +319,21 @@ void stopAll() {
 	}
 }
 
-void pidCaseLowX(uint16_t output){
-	pidHeightControl(3, 770, 450, output);
-	pidHeightControl(4, 770, 450, output);
-	pidHeightControl(1, 420, 100, output);
-	pidHeightControl(6, 420, 100, output);
-}
-
-void pidCaseHighX(uint16_t output){
+void pidCaseLowY(uint16_t output){
 	pidHeightControl(3, 420, 100, output);
 	pidHeightControl(4, 420, 100, output);
 	pidHeightControl(1, 770, 450, output);
 	pidHeightControl(6, 770, 450, output);
 }
 
-void pidCaseLowY(uint16_t output){
+void pidCaseHighY(uint16_t output){
+	pidHeightControl(3, 770, 450, output);
+	pidHeightControl(4, 770, 450, output);
+	pidHeightControl(1, 420, 100, output);
+	pidHeightControl(6, 420, 100, output);
+}
+
+void pidCaseLowZ(uint16_t output){
 	pidHeightControl(1, 420, 100, output);
 	pidHeightControl(3, 420, 100, output);
 	pidHeightControl(2, 420, 100, output);
@@ -342,7 +342,7 @@ void pidCaseLowY(uint16_t output){
 	pidHeightControl(6, 770, 450, output);
 }
 
-void pidCaseHighY(uint16_t output){
+void pidCaseHighZ(uint16_t output){
 	pidHeightControl(5, 420, 100, output);
 	pidHeightControl(4, 420, 100, output);
 	pidHeightControl(6, 420, 100, output);
@@ -396,9 +396,9 @@ void hexMove::arrayInit(){
 	commands[10] = {changeHeightDec, changeHDec};
 
 
-	pidCommands[0] = {lowX, pidCaseLowX};
-	pidCommands[1] = {lowY, pidCaseLowY};
-	pidCommands[2] = {highX, pidCaseHighX};
-	pidCommands[3] = {highY, pidCaseHighY};
+	pidCommands[0] = {lowY, pidCaseLowY};
+	pidCommands[1] = {lowZ, pidCaseLowZ};
+	pidCommands[2] = {highY, pidCaseHighY};
+	pidCommands[3] = {highZ, pidCaseHighZ};
 
 }

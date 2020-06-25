@@ -143,6 +143,11 @@ void begins() {
 	SerialBT.begin("HEX-HEX FRUIT"); //Bluetooth device name
 	//Wire.begin();
 	p.begin();
+	pinMode(19, OUTPUT);
+	pinMode(32, OUTPUT);
+	digitalWrite(19, LOW);
+	digitalWrite(32, LOW);
+	
 	//mpu6050.begin();
 }
 
@@ -159,19 +164,9 @@ void setup() {
 void loop() {
 	//checkOnGround();
 	if(cmd.balanceStatus()){
-		p.printConrdinates();
+		p.pidBalance();
 	}
 	cmd.sendVoltage(SerialBT);
 	cmd.recieveCommand(SerialBT);
 	delay(20);
-	/*
-	if (!toggle) {
-		if (enable) {
-			PidLoopY();
-		}
-		else {
-			PidLoopX();
-		}
-	}
-	*/
 }

@@ -6,20 +6,21 @@ MPU6050 mpu6050(Wire);
 commandLine pidCmd;
 
 //PID variables
+static double SetpointZ, InputZ, OutputZ1, OutputZ2;
 static double SetpointY, InputY, OutputY1, OutputY2;
-static double SetpointX, InputX, OutputX1, OutputX2;
 //initial tuning parameters
 double Kp = 1, Ki = 0, Kd = 0;
 
+PID zPos(&InputZ, &OutputZ1, &SetpointZ, Kp, Ki, Kd, REVERSE);
+PID zNeg(&InputZ, &OutputZ2, &SetpointZ, Kp, Ki, Kd, DIRECT);
 PID yPos(&InputY, &OutputY1, &SetpointY, Kp, Ki, Kd, REVERSE);
 PID yNeg(&InputY, &OutputY2, &SetpointY, Kp, Ki, Kd, DIRECT);
-PID xPos(&InputX, &OutputX1, &SetpointX, Kp, Ki, Kd, REVERSE);
-PID xNeg(&InputX, &OutputX2, &SetpointX, Kp, Ki, Kd, DIRECT);
 
 
 //pid switch
 bool enable = true;
 
+int startTime = 0;
 
 pid::pid(bool massage){}
 
@@ -27,56 +28,32 @@ void pid::begin(){
 	Wire.begin();
 	mpu6050.begin();
     mpu6050.calcGyroOffsets(true);
-	    SetpointY = 122;
-	SetpointX = 122;
-	xPos.SetMode(AUTOMATIC);
-	xPos.SetTunings(Kp, Ki, Kd);
-	xNeg.SetMode(AUTOMATIC);
-	xNeg.SetTunings(Kp, Ki, Kd);
+	SetpointZ = 122;
+	SetpointY = 122;
 	yPos.SetMode(AUTOMATIC);
 	yPos.SetTunings(Kp, Ki, Kd);
 	yNeg.SetMode(AUTOMATIC);
 	yNeg.SetTunings(Kp, Ki, Kd);
+	zPos.SetMode(AUTOMATIC);
+	zPos.SetTunings(Kp, Ki, Kd);
+	zNeg.SetMode(AUTOMATIC);
+	zNeg.SetTunings(Kp, Ki, Kd);
 }
 
-
-void PidLoopX() {
-	//mpu6050.update();
-	int angleX = mpu6050.getAngleZ();
-	Serial.print("x:  ");
-	Serial.print(angleX);
-	InputX = map(angleX, -45, 45, 0, 255);
-	xPos.Compute();
-	xNeg.Compute();
-	OutputX1 = map(OutputX1, 0, 255, 800, 400);
-	OutputX2 = map(OutputX2, 0, 255, 800, 400);
-	if (angleX < -5) {
-		pidCmd.executePidCommand(lowX, OutputX1);
-	}
-	else if (angleX > 5) {
-        pidCmd.executePidCommand(highX, OutputX1);
-	}
-	else {
-		pidCmd.executeCommand(stop);
-		enable = true;
-	}
-}
 
 void PidLoopY() {
 	mpu6050.update();
-	int angleY = -1 * mpu6050.getAngleY();
-	Serial.print("  y:  ");
-	Serial.println(angleY);
+	int angleY = -1*mpu6050.getAngleY();
 	InputY = map(angleY, 0, 180, 0, 255);
 	yPos.Compute();
 	yNeg.Compute();
 	OutputY1 = map(OutputY1, 0, 255, 800, 400);
 	OutputY2 = map(OutputY2, 0, 255, 800, 400);
 	if (angleY < 75) {
-       pidCmd.executePidCommand(lowY, OutputX1);
+		pidCmd.executePidCommand(lowY, OutputY1);
 	}
-	else if (angleY > 85) {
-       pidCmd.executePidCommand(highY, OutputX1);
+	else if (angleY > 95) {
+        pidCmd.executePidCommand(highY, OutputY2);
 	}
 	else {
 		pidCmd.executeCommand(stop);
@@ -84,15 +61,34 @@ void PidLoopY() {
 	}
 }
 
+void PidLoopZ() {
+	mpu6050.update();
+	int angleZ = mpu6050.getAngleZ();
+	InputZ = map(angleZ, -90, 90, 0, 255);
+	zPos.Compute();
+	zNeg.Compute();
+	OutputZ1 = map(OutputZ1, 0, 255, 800, 400);
+	OutputZ2 = map(OutputZ2, 0, 255, 800, 400);
+	if (angleZ < -15) {
+       pidCmd.executePidCommand(lowZ, OutputZ2);
+	}
+	else if (angleZ > 15) {
+       pidCmd.executePidCommand(highZ, OutputZ1);
+	}
+	else {
+		pidCmd.executeCommand(stop);
+		enable = true;
+	}
+}
+
 void pid::printConrdinates(){
 	mpu6050.update();
 	Serial.print("  x:  ");
-	Serial.print(mpu6050.getAngleX());
-	Serial.print("  y:  ");
 	Serial.print(mpu6050.getAngleY());
+	Serial.print("  y:  ");
+	Serial.print(mpu6050.getAngleZ());
 	Serial.print("  z:  ");
 	Serial.println(mpu6050.getAngleZ());
-	delay(300);
 }
 
 void pid::pidBalance(){
@@ -100,7 +96,13 @@ void pid::pidBalance(){
 		PidLoopY();
 	}
 	else {
-		PidLoopX();
+		PidLoopZ();
 	}
+	/*
+	if(millis()-startTime > 1000){
+		startTime = millis();
+		printConrdinates();
+	}
+	*/
 }
 

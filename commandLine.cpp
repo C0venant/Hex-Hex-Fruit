@@ -127,7 +127,6 @@ void commandLine::recieveCommand(BluetoothSerial& SerialBT){
 		}
 		lastCommand = rCommand;
 		lastCommandTime = millis();
-		Serial1.println("ragac");
 		executeCommand(rCommand);
 		if (rCommand == reset) {
 			ESP.restart();

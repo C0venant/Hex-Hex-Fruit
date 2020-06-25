@@ -31,10 +31,10 @@
 #define stop 40
 
 //pid signals
-#define lowX 1
-#define lowY 2
-#define highX 3
-#define highY 4
+#define lowY 1
+#define lowZ 2
+#define highY 3
+#define highZ 4
 
 struct Leg {
 	uint8_t up;
