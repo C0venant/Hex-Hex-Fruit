@@ -8,7 +8,7 @@
 #endif
 
 //command Array size
-#define comSize 10
+#define comSize 12
 #define pidComSize 5
 
 //initial position values
@@ -24,16 +24,17 @@
 #define left 49
 #define backwards 52
 #define wave 56
-#define changeHeight 57
+#define changeHeightInc 57
+#define changeHeightDec 58
 #define rightSideWalk 47
 #define leftSideWalk 48
 #define stop 40
 
 //pid signals
-#define lowX 1
-#define lowY 2
-#define highX 3
-#define highY 4
+#define lowY 1
+#define lowZ 2
+#define highY 3
+#define highZ 4
 
 struct Leg {
 	uint8_t up;

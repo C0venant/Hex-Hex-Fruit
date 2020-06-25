@@ -5,8 +5,7 @@
 #define commandInterval 500
 #define nullCommand 10
 
-#define hexMode 31
-#define quadMode 30
+
 
 static int WalkMode = hexMode;
 
@@ -17,11 +16,17 @@ static hexMove move;
 static quadMove qmove;
 static uint8_t rCommand = 0;
 
+bool balanceEnabled = false;
+
 
 // constructor
 commandLine::commandLine(bool massage){
 	move.arrayInit();
 	qmove.arrayInit();
+};
+
+bool commandLine::balanceStatus(){
+	return balanceEnabled;
 };
 
 // executes basic commands
@@ -90,14 +95,34 @@ void transform(){
 	lastCommand = nullCommand;
 }
 
+void toggleBalance(){
+	if(balanceEnabled){
+		balanceEnabled = false;
+	}else{
+		balanceEnabled = true;
+	}
+	lastCommand = nullCommand;
+}
+
+boolean checkForInternalChange(){
+	if(rCommand == hexMode || rCommand == quadMode){
+		transform();
+		return true;
+		
+	}else if(rCommand == balance){
+		toggleBalance();
+		return true;
+	}
+	return false;
+}
+
 // recieves incoming signal and calls method executioner
 
 void commandLine::recieveCommand(BluetoothSerial& SerialBT){
 	if (SerialBT.available()) {
 		rCommand = SerialBT.read();
 		display(rCommand);
-		if(rCommand == hexMode || rCommand == quadMode){
-			transform();
+		if(checkForInternalChange()){
 			return;
 		}
 		lastCommand = rCommand;

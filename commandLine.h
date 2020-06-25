@@ -16,6 +16,9 @@
 #define balance 53
 #define reset 60
 
+#define hexMode 31
+#define quadMode 30
+
 
 class commandLine {
 public:
@@ -23,6 +26,7 @@ public:
 	commandLine(bool massage = false);
 
 	//Methods
+	bool balanceStatus();
 	void functionsInit();
 	void executeCommand(uint8_t id);
 	void executePidCommand(uint8_t id, uint16_t v);

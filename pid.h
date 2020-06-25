@@ -8,7 +8,10 @@
 #endif
 
 #include "hexMove.h"
-
+#include "commandLine.h"
+#include <Wire.h>
+#include <PID_v1.h>
+#include <MPU6050_tockn.h>
 
 class pid {
 public:
@@ -16,7 +19,8 @@ public:
 	pid(bool massage = false);
 	//Methods
     void pidBalance();
-
+	void printConrdinates();
+	void begin();
 private:
 	
 

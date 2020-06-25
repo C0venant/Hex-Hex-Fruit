@@ -1,9 +1,8 @@
 #include "busServo.h"
-#include <MPU6050_tockn.h>
-#include <Wire.h>
-#include <PID_v1.h>
-#include "commandLine.h"
-#include <string.h>
+//#include <MPU6050_tockn.h>
+//#include <Wire.h>
+//#include <PID_v1.h>
+//#include "commandLine.h"
 #include "pid.h"
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
@@ -16,7 +15,7 @@ BluetoothSerial SerialBT;
 commandLine cmd;
 //hexMove move;
 
-//pid p;
+pid p;
 //constants
 #define RXD2 16
 #define TXD2 17
@@ -142,7 +141,13 @@ void begins() {
 	Serial.begin(115200);
 	Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
 	SerialBT.begin("HEX-HEX FRUIT"); //Bluetooth device name
-	Wire.begin();
+	//Wire.begin();
+	p.begin();
+	pinMode(19, OUTPUT);
+	pinMode(32, OUTPUT);
+	digitalWrite(19, LOW);
+	digitalWrite(32, LOW);
+	
 	//mpu6050.begin();
 }
 
@@ -158,17 +163,10 @@ void setup() {
 
 void loop() {
 	//checkOnGround();
+	if(cmd.balanceStatus()){
+		p.pidBalance();
+	}
 	cmd.sendVoltage(SerialBT);
 	cmd.recieveCommand(SerialBT);
 	delay(20);
-	/*
-	if (!toggle) {
-		if (enable) {
-			PidLoopY();
-		}
-		else {
-			PidLoopX();
-		}
-	}
-	*/
 }
