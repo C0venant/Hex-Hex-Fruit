@@ -7,6 +7,7 @@
 
 static bool stepTurn = true;
 static busServo servo;
+static uint8_t legButtons[6];
 
 struct legPos {
 	int up;
@@ -16,7 +17,7 @@ struct legPos {
  
 static Leg legs[6];
 
-hexMove::hexMove(bool massage) {
+void hexMove::legSetup(){
 	legs[0].up = 6;
 	legs[0].mid = 5;
 	legs[0].down = 4;
@@ -42,11 +43,27 @@ hexMove::hexMove(bool massage) {
 	legs[5].down= 7;
 }
 
+void hexMove::legButtonSetup(){
+	legButtons[0] = 23;
+	legButtons[1] = 25;
+	legButtons[2] = 26;
+	legButtons[3] = 27;
+	legButtons[4] = 14;
+	legButtons[5] = 13;
+}
+
+
+hexMove::hexMove(bool massage) {
+	legSetup();
+	legButtonSetup();
+}
+
 void getposition(uint8_t n, legPos* pos){
 	pos->down = -2048;
 	pos->mid = -2048;
 	//pos->up = -2048;
 	while(pos->down == -2048){
+		Serial.print("bageqsa");
 		pos->down = servo.serialPos(Serial2, legs[n-1].down);
 	}
 	while(pos->mid == -2048){
@@ -57,6 +74,41 @@ void getposition(uint8_t n, legPos* pos){
 		pos->up = servo.serialPos(Serial2, legs[n-1].up);
 	}	
 	*/
+}
+
+void stopLeg(int n) {
+	servo.serialStop(Serial2, legs[n].mid);
+	servo.serialStop(Serial2, legs[n].down);
+}
+
+void waitTripodDown(int f, int s, int t){
+	bool first = true;
+	bool second = true;
+	bool third = true;
+	while(!first && !second && !third){
+		if(digitalRead(legButtons[f]) == LOW){
+			first = false;
+			stopLeg(f);
+		}
+		if(digitalRead(legButtons[s]) == LOW){
+			second = false;
+			stopLeg(s);
+		}
+		if(digitalRead(legButtons[t]) == LOW){
+			third = false;
+			stopLeg(t);
+		}
+	} 
+}
+
+void waitTripod1Down(){
+	//0,2,4
+	waitTripodDown(0, 2, 4);
+}
+
+void waitTripod2Down(){
+	//1,3,5
+	waitTripodDown(1, 3, 5);
 }
 
 void liftUp(uint8_t n, int16_t pos) {

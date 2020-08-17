@@ -63,7 +63,7 @@ public:
 	command commands[comSize];
 	pidCommand pidCommands[pidComSize];
 	//Methods
-	void legSetup();
+
 	//void stopAll();
 	void pidHeightControl(uint8_t n, int16_t midPos, int16_t lowPos, uint16_t v);
 	int getVin();
@@ -71,6 +71,8 @@ public:
 
 private:
 	void changeH(int delta, uint16_t v);
+	void legSetup();
+	void legButtonSetup();
 };
 
 #endif
