@@ -85,7 +85,8 @@ void waitTripodDown(int f, int s, int t){
 	bool first = true;
 	bool second = true;
 	bool third = true;
-	while(!first && !second && !third){
+	while(true){
+		if(!first && !second && !third) break;
 		if(digitalRead(legButtons[f]) == LOW){
 			first = false;
 			stopLeg(f);
