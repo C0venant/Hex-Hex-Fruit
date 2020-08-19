@@ -63,11 +63,11 @@ void getposition(uint8_t n, legPos* pos){
 	pos->down = -2048;
 	pos->mid = -2048;
 	//pos->up = -2048;
-	while(pos->down == -2048){
-		Serial.print("bageqsa");
+	int startCount = millis();
+	while(pos->down == -2048 && millis()-startCount < 1000){
 		pos->down = servo.serialPos(Serial2, legs[n-1].down);
 	}
-	while(pos->mid == -2048){
+	while(pos->mid == -2048 && millis()-startCount < 1000){
 		pos->mid = servo.serialPos(Serial2, legs[n-1].mid);
 	}
 	/*
@@ -251,6 +251,19 @@ void tripod2Lean(int initial,int16_t pos){
 	lean(6,0,initial+pos);
 	delay(delayCoef);
 }
+
+void tripodStepDown(int tripod ,int pos){
+	if(!buttonSwitch){
+		Serial.println("not toggled");
+		if(tripod == 1){
+			tripod1Down(pos);
+		}else{
+			tripod2Down(pos);
+		}
+	}else{
+		//fill in
+	}
+}
 ///////////////////////////////////////////////////
 
 ///////////// this segment of code contains main functions for robot movement
@@ -262,9 +275,7 @@ void step1(int sign) {
 	tripod1Up(pos[0].mid-120);
 	tripod2Push(0);
 	tripod1Push(sign * 150);
-	if(!buttonSwitch){
-		tripod1Down(pos[0].mid);
-	}
+	tripodStepDown(1, pos[0].mid);
 	//stepCheck (1,3,5);   
 }
 
@@ -275,9 +286,7 @@ void step2(int sign) {
 	tripod2Up(pos[0].mid-120);
 	tripod1Push(0);
 	tripod2Push(sign * 150);
-	if(!buttonSwitch){
-		tripod2Down(pos[0].mid);
-	}
+	tripodStepDown(2, pos[0].mid);
 	//stepCheck (2,4,6);   
 }
 //tripod1 turn 
@@ -287,9 +296,7 @@ void turn1(int sign) {
 	tripod1Up(pos[0].mid-120);
 	tripod2Turn(0);
 	tripod1Turn(sign * 150);
-	if(!buttonSwitch){
-		tripod1Down(pos[0].mid);
-	}
+	tripodStepDown(1, pos[0].mid);
 	//stepCheck (1,3,5);   
 }
 //tripod2 turn
@@ -299,9 +306,7 @@ void turn2(int sign) {
 	tripod2Up(pos[0].mid-120);
 	tripod1Turn(0);
 	tripod2Turn(sign * 150);
-	if(!buttonSwitch){
-		tripod2Down(pos[0].mid);
-	}
+	tripodStepDown(2, pos[0].mid);
 	//stepCheck (2,4,6);      
 }
 //walk sideways
@@ -311,9 +316,7 @@ void sideWalk1(int sign){
 	tripod1Up(pos[0].mid-120);
 	tripod2Lean(pos[0].down,0);
 	tripod1Lean(pos[0].down,sign*70);
-	if(!buttonSwitch){
-		tripod1Down(pos[0].mid);
-	}
+	tripodStepDown(1, pos[0].mid);
 }
 
 static void sideWalk2(int sign){
@@ -322,9 +325,7 @@ static void sideWalk2(int sign){
 	tripod2Up(pos[0].mid-120);
 	tripod1Lean(pos[0].down,0);
 	tripod2Lean(pos[0].down,sign*70);
-	if(!buttonSwitch){
-		tripod2Down(pos[0].mid);
-	}
+	tripodStepDown(2, pos[0].mid);
 }
 
 
