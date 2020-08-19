@@ -8,6 +8,7 @@
 static bool stepTurn = true;
 static busServo servo;
 static uint8_t legButtons[6];
+static bool buttonSwitch = false;
 
 struct legPos {
 	int up;
@@ -74,6 +75,10 @@ void getposition(uint8_t n, legPos* pos){
 		pos->up = servo.serialPos(Serial2, legs[n-1].up);
 	}	
 	*/
+}
+
+void toggleBSwitch(){
+	buttonSwitch = !buttonSwitch;
 }
 
 void stopLeg(int n) {
@@ -257,7 +262,9 @@ void step1(int sign) {
 	tripod1Up(pos[0].mid-120);
 	tripod2Push(0);
 	tripod1Push(sign * 150);
-	tripod1Down(pos[0].mid);
+	if(!buttonSwitch){
+		tripod1Down(pos[0].mid);
+	}
 	//stepCheck (1,3,5);   
 }
 
@@ -268,7 +275,9 @@ void step2(int sign) {
 	tripod2Up(pos[0].mid-120);
 	tripod1Push(0);
 	tripod2Push(sign * 150);
-	tripod2Down(pos[0].mid);
+	if(!buttonSwitch){
+		tripod2Down(pos[0].mid);
+	}
 	//stepCheck (2,4,6);   
 }
 //tripod1 turn 
@@ -278,7 +287,9 @@ void turn1(int sign) {
 	tripod1Up(pos[0].mid-120);
 	tripod2Turn(0);
 	tripod1Turn(sign * 150);
-	tripod1Down(pos[0].mid);
+	if(!buttonSwitch){
+		tripod1Down(pos[0].mid);
+	}
 	//stepCheck (1,3,5);   
 }
 //tripod2 turn
@@ -288,7 +299,9 @@ void turn2(int sign) {
 	tripod2Up(pos[0].mid-120);
 	tripod1Turn(0);
 	tripod2Turn(sign * 150);
-	tripod2Down(pos[0].mid);
+	if(!buttonSwitch){
+		tripod2Down(pos[0].mid);
+	}
 	//stepCheck (2,4,6);      
 }
 //walk sideways
@@ -298,7 +311,9 @@ void sideWalk1(int sign){
 	tripod1Up(pos[0].mid-120);
 	tripod2Lean(pos[0].down,0);
 	tripod1Lean(pos[0].down,sign*70);
-	tripod1Down(pos[0].mid);
+	if(!buttonSwitch){
+		tripod1Down(pos[0].mid);
+	}
 }
 
 static void sideWalk2(int sign){
@@ -307,7 +322,9 @@ static void sideWalk2(int sign){
 	tripod2Up(pos[0].mid-120);
 	tripod1Lean(pos[0].down,0);
 	tripod2Lean(pos[0].down,sign*70);
-	tripod2Down(pos[0].mid);
+	if(!buttonSwitch){
+		tripod2Down(pos[0].mid);
+	}
 }
 
 
@@ -459,7 +476,7 @@ void hexMove::arrayInit(){
 	commands[8] = {stop, stopAll};
 	commands[9] = {changeHeightInc, changeHInc};
 	commands[10] = {changeHeightDec, changeHDec};
-
+	commands[11] = {toggleButtonSwitch, toggleBSwitch};
 
 	pidCommands[0] = {lowY, pidCaseLowY};
 	pidCommands[1] = {lowZ, pidCaseLowZ};

@@ -29,6 +29,7 @@
 #define rightSideWalk 47
 #define leftSideWalk 48
 #define stop 40
+#define toggleButtonSwitch 61
 
 //pid signals
 #define lowY 1
