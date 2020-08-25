@@ -98,6 +98,7 @@ void pid::pidBalance(){
 	else {
 		PidLoopZ();
 	}
+	//show current angle anligment
 	/*
 	if(millis()-startTime > 1000){
 		startTime = millis();

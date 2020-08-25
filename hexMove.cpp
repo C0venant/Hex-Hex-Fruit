@@ -9,6 +9,7 @@ static busServo servo;
 static uint8_t legButtons[6];
 static bool buttonSwitch = false;
 static Leg legs[6];
+static int16_t velocity = 200;
 
 struct legPos
 {
@@ -67,6 +68,11 @@ void getposition(uint8_t n, legPos *pos)
 void toggleBSwitch()
 {
 	buttonSwitch = !buttonSwitch;
+	if(buttonSwitch){
+		velocity = 500;
+	}else{
+		velocity = 200;
+	}
 }
 
 void stopLeg(int n)
@@ -114,24 +120,24 @@ void waitTripod2Down()
 
 void liftUp(uint8_t n, int16_t pos)
 {
-	servo.serialMove(Serial2, legs[n - 1].mid, pos, 200);
+	servo.serialMove(Serial2, legs[n - 1].mid, pos, velocity);
 }
 
 void liftDown(uint8_t n, int16_t pos)
 {
-	servo.serialMove(Serial2, legs[n - 1].mid, pos, 200);
+	servo.serialMove(Serial2, legs[n - 1].mid, pos, velocity);
 }
 
 // pushes body in horizontal direction
 void horPush(uint8_t n, int16_t pos)
 {
-	servo.serialMove(Serial2, legs[n - 1].up, pos, 200);
+	servo.serialMove(Serial2, legs[n - 1].up, pos, velocity);
 }
 
 void lean(uint8_t n, int16_t midpos, int16_t downpos)
 {
 	//servo.serialMove(Serial2, legs[n-1].mid, midpos, 200);
-	servo.serialMove(Serial2, legs[n - 1].down, downpos, 200);
+	servo.serialMove(Serial2, legs[n - 1].down, downpos, velocity);
 }
 
 //change height of the body according to delta
@@ -195,34 +201,50 @@ static void stepCheck(int a, int b, int c) {
 */
 ///////// this part of code contains helper functions for robot movement
 
-void tripod1Up(int pos)
+void tripod1Up(int16_t pos)
 {
 	liftUp(1, pos);
 	liftUp(3, pos);
 	liftUp(5, pos);
 	delay(delayCoef);
 }
-void tripod2Up(int pos)
+void tripod2Up(int16_t pos)
 {
 	liftUp(2, pos);
 	liftUp(4, pos);
 	liftUp(6, pos);
 	delay(delayCoef);
 }
-void tripod1Down(int pos)
+void tripod1Down(int16_t pos)
 {
 	liftDown(1, pos);
 	liftDown(3, pos);
 	liftDown(5, pos);
 	delay(delayCoef);
 }
-void tripod2Down(int pos)
+void tripod2Down(int16_t pos)
 {
 	liftDown(2, pos);
 	liftDown(4, pos);
 	liftDown(6, pos);
 	delay(delayCoef);
 }
+
+void tripod1DownButton(int16_t pos)
+{
+	liftDown(1, pos);
+	liftDown(3, pos);
+	liftDown(5, pos);
+	waitTripod1Down();
+}
+void tripod2DownButton(int16_t pos)
+{
+	liftDown(2, pos);
+	liftDown(4, pos);
+	liftDown(6, pos);
+	waitTripod2Down();
+}
+
 void tripod1Push(int16_t pos)
 {
 	horPush(1, 500 - pos);
@@ -267,6 +289,23 @@ void tripod2Lean(int initial, int16_t pos)
 	lean(6, 0, initial + pos);
 	delay(delayCoef);
 }
+
+void stepDown(uint8_t tripod, int16_t pos){
+	if(!buttonSwitch){
+		if(tripod == 1){
+			tripod1Down(pos);
+		}else{
+			tripod2Down(pos);
+		}
+	}else{
+		if(tripod == 1){
+			tripod1DownButton(600);
+		}else{
+			tripod2DownButton(600);
+		}
+	}
+}
+
 ///////////////////////////////////////////////////
 
 ///////////// this segment of code contains main functions for robot movement
@@ -279,10 +318,7 @@ void step1(int sign)
 	tripod1Up(pos[0].mid - 120);
 	tripod2Push(0);
 	tripod1Push(sign * 150);
-	if (!buttonSwitch)
-	{
-		tripod1Down(pos[0].mid);
-	}
+	stepDown(1, pos[0].mid);
 	//stepCheck (1,3,5);
 }
 
@@ -294,10 +330,7 @@ void step2(int sign)
 	tripod2Up(pos[0].mid - 120);
 	tripod1Push(0);
 	tripod2Push(sign * 150);
-	if (!buttonSwitch)
-	{
-		tripod2Down(pos[0].mid);
-	}
+	stepDown(2, pos[0].mid);
 	//stepCheck (2,4,6);
 }
 //tripod1 turn
@@ -308,10 +341,7 @@ void turn1(int sign)
 	tripod1Up(pos[0].mid - 120);
 	tripod2Turn(0);
 	tripod1Turn(sign * 150);
-	if (!buttonSwitch)
-	{
-		tripod1Down(pos[0].mid);
-	}
+	stepDown(1, pos[0].mid);
 	//stepCheck (1,3,5);
 }
 //tripod2 turn
@@ -322,10 +352,7 @@ void turn2(int sign)
 	tripod2Up(pos[0].mid - 120);
 	tripod1Turn(0);
 	tripod2Turn(sign * 150);
-	if (!buttonSwitch)
-	{
-		tripod2Down(pos[0].mid);
-	}
+	stepDown(2, pos[0].mid);
 	//stepCheck (2,4,6);
 }
 //walk sideways
@@ -336,10 +363,7 @@ void sideWalk1(int sign)
 	tripod1Up(pos[0].mid - 120);
 	tripod2Lean(pos[0].down, 0);
 	tripod1Lean(pos[0].down, sign * 70);
-	if (!buttonSwitch)
-	{
-		tripod1Down(pos[0].mid);
-	}
+	stepDown(1, pos[0].mid);
 }
 
 static void sideWalk2(int sign)
@@ -349,10 +373,7 @@ static void sideWalk2(int sign)
 	tripod2Up(pos[0].mid - 120);
 	tripod1Lean(pos[0].down, 0);
 	tripod2Lean(pos[0].down, sign * 70);
-	if (!buttonSwitch)
-	{
-		tripod2Down(pos[0].mid);
-	}
+	stepDown(2, pos[0].mid);
 }
 
 void stepForward()
@@ -503,6 +524,28 @@ void waveHand()
 	delay(600);
 	servo.serialMove(Serial2, legs[0].up, 350, 400);
 	delay(10);
+	for(int i = 0; i < 3; i++)
+	{
+		servo.serialMove(Serial2, legs[0].down, 700, 300);
+		delay(300);
+		servo.serialMove(Serial2, legs[0].down, 350, 300);
+		delay(300);
+	}
+	
+}
+
+void discoPartyMoves(){
+	int16_t prevVelocity = velocity;
+	velocity = 400;
+	for(int i = 0; i < 4; i++){
+		tripod2Turn(150);
+		tripod1Turn(150);
+		delay(500);
+		tripod2Turn(-150);
+		tripod1Turn(-150);
+		delay(500);
+	}
+	velocity = prevVelocity;
 }
 
 void intialPos()
@@ -540,6 +583,7 @@ void hexMove::arrayInit()
 	commands[9] = {changeHeightInc, changeHInc};
 	commands[10] = {changeHeightDec, changeHDec};
 	commands[11] = {toggleButtonSwitch, toggleBSwitch};
+	commands[12] = {discoParty, discoPartyMoves};
 
 	pidCommands[0] = {lowY, pidCaseLowY};
 	pidCommands[1] = {lowZ, pidCaseLowZ};
