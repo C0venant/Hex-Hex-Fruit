@@ -121,11 +121,17 @@ void waitTripod2Down()
 void liftUp(uint8_t n, int16_t pos)
 {
 	servo.serialMove(Serial2, legs[n - 1].mid, pos, velocity);
+	if(buttonSwitch){
+		servo.serialMove(Serial2, legs[n - 1].down, initialDown, velocity);
+	}
 }
 
 void liftDown(uint8_t n, int16_t pos)
 {
 	servo.serialMove(Serial2, legs[n - 1].mid, pos, velocity);
+	if(buttonSwitch){
+		servo.serialMove(Serial2, legs[n - 1].down, 90, velocity);
+	}
 }
 
 // pushes body in horizontal direction
@@ -299,9 +305,9 @@ void stepDown(uint8_t tripod, int16_t pos){
 		}
 	}else{
 		if(tripod == 1){
-			tripod1DownButton(600);
+			tripod1DownButton(650);
 		}else{
-			tripod2DownButton(600);
+			tripod2DownButton(650);
 		}
 	}
 }
