@@ -44,12 +44,12 @@ void pid::begin(){
 void PidLoopY() {
 	mpu6050.update();
 	int angleY = -1*mpu6050.getAngleY();
-	InputY = map(angleY, 0, 180, 0, 255);
-	yPos.Compute();
-	yNeg.Compute();
-	OutputY1 = map(OutputY1, 0, 255, 800, 400);
-	OutputY2 = map(OutputY2, 0, 255, 800, 400);
-	if (angleY < 75) {
+	InputY = map(angleY, 50, 150, 0, 255);
+	//yPos.Compute();
+	//yNeg.Compute();
+	OutputY1 = map(InputY, 0, 255, 500, 200);
+	OutputY2 = map(InputY, 0, 255, 500, 200);
+	if (angleY < 85) {
 		pidCmd.executePidCommand(lowY, OutputY2);
 	}
 	else if (angleY > 95) {
@@ -64,15 +64,15 @@ void PidLoopY() {
 void PidLoopZ() {
 	mpu6050.update();
 	int angleZ = mpu6050.getAngleZ();
-	InputZ = map(angleZ, -90, 90, 0, 255);
-	zPos.Compute();
-	zNeg.Compute();
-	OutputZ1 = map(OutputZ1, 0, 255, 800, 400);
-	OutputZ2 = map(OutputZ2, 0, 255, 800, 400);
-	if (angleZ < -15) {
+	InputZ = map(angleZ, -40, 40, 0, 255);
+	//zPos.Compute();
+	//zNeg.Compute();
+	OutputZ1 = map(InputZ, 0, 255, 500, 200);
+	OutputZ2 = map(InputZ, 0, 255, 500, 200);
+	if (angleZ < -5) {
        pidCmd.executePidCommand(lowZ, OutputZ2);
 	}
-	else if (angleZ > 15) {
+	else if (angleZ > 5) {
        pidCmd.executePidCommand(highZ, OutputZ1);
 	}
 	else {
@@ -84,11 +84,23 @@ void PidLoopZ() {
 void pid::printConrdinates(){
 	mpu6050.update();
 	Serial.print("  x:  ");
-	Serial.print(mpu6050.getAngleY());
+	Serial.print(mpu6050.getAngleX());
 	Serial.print("  y:  ");
-	Serial.print(mpu6050.getAngleZ());
+	Serial.print(mpu6050.getAngleY());
 	Serial.print("  z:  ");
-	Serial.println(mpu6050.getAngleZ());
+	Serial.print(mpu6050.getAngleZ());
+	Serial.print("  InputY:  ");
+	Serial.print(InputY);
+	Serial.print("  OutputY1:  ");
+	Serial.print(OutputY1);
+	Serial.print("  OutputY2:  ");
+	Serial.print(OutputY2);
+	Serial.print("  InputZ:  ");
+	Serial.print(InputZ);
+	Serial.print("  OutputZ1:  ");
+	Serial.print(OutputZ1);
+	Serial.print("  OutputZ2:  ");
+	Serial.println(OutputZ2);	
 }
 
 void pid::pidBalance(){
@@ -98,11 +110,12 @@ void pid::pidBalance(){
 	else {
 		PidLoopZ();
 	}
-	/*
+	//show current angle anligment
+	
 	if(millis()-startTime > 1000){
 		startTime = millis();
 		printConrdinates();
 	}
-	*/
+	
 }
 

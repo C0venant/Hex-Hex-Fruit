@@ -112,6 +112,13 @@ boolean checkForInternalChange(){
 	}else if(rCommand == balance){
 		toggleBalance();
 		return true;
+	}else if(rCommand == toggleLight){
+		if(digitalRead(light) == LOW){
+			digitalWrite(light, HIGH);
+		}else{
+			digitalWrite(light, LOW);
+		}	
+		return true;
 	}
 	return false;
 }

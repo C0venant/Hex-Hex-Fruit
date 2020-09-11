@@ -8,7 +8,7 @@
 #endif
 
 //command Array size
-#define comSize 12
+#define comSize 13
 #define pidComSize 5
 
 //initial position values
@@ -30,6 +30,7 @@
 #define leftSideWalk 48
 #define stop 40
 #define toggleButtonSwitch 61
+#define discoParty 63
 
 //pid signals
 #define lowY 1

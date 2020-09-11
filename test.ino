@@ -20,6 +20,7 @@ pid p;
 #define RXD2 16
 #define TXD2 17
 
+
 /*
 
 //PID variables
@@ -38,12 +39,9 @@ bool enable = true;
 */
 
 void legButtons() {
-	pinMode(13, INPUT_PULLUP);
-	pinMode(14, INPUT_PULLUP);
-	pinMode(27, INPUT_PULLUP);
-	pinMode(26, INPUT_PULLUP);
-	pinMode(25, INPUT_PULLUP);
-	pinMode(23, INPUT_PULLUP);
+	for (uint8_t i = 3;i <= 8;i++) {
+		pinMode(i, INPUT_PULLUP);
+	}
 }
 
 /*
@@ -125,27 +123,6 @@ void PidLoopY() {
 }
 */
 
-void checkOnGroundTest() {
-	if (digitalRead(13) == LOW) {
-		Serial.println("Pin 13 is high");
-	}
-	if(digitalRead(14) == LOW){
-		Serial.println("Pin 14 is high");
-	}
-	if (digitalRead(27) == LOW) {
-		Serial.println("Pin 27 is high");
-	}
-	if(digitalRead(26) == LOW){
-		Serial.println("Pin 26 is high");
-	}
-	if (digitalRead(25) == LOW) {
-		Serial.println("Pin 25 is high");
-	}
-	if(digitalRead(23) == LOW){
-		Serial.println("Pin 23 is high");
-	}
-
-}
 
 /*
 void checkOnGround() {
@@ -167,17 +144,13 @@ void begins() {
 	SerialBT.begin("HEX-HEX FRUIT TEST"); //Bluetooth device name
 	//Wire.begin();
 	p.begin();
-	//pinMode(19, OUTPUT);
-	//pinMode(32, OUTPUT);
-	//digitalWrite(19, LOW);
-	//digitalWrite(32, LOW);
-	
+	pinMode(light, OUTPUT);
+	digitalWrite(light, HIGH);
 	//mpu6050.begin();
 }
 
 void setup() {
 	begins();
-	legButtons();
 	cmd.executeCommand(inPose);
 	delay(500);
 	//mpu6050.calcGyroOffsets(true);
@@ -187,7 +160,7 @@ void setup() {
 
 
 void loop() {
-	checkOnGroundTest();
+	//checkOnGround();
 	if(cmd.balanceStatus()){
 		p.pidBalance();
 	}
