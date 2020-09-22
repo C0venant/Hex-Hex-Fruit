@@ -20,6 +20,7 @@ pid p;
 #define RXD2 16
 #define TXD2 17
 
+
 /*
 
 //PID variables
@@ -140,14 +141,11 @@ void checkOnGround() {
 void begins() {
 	Serial.begin(115200);
 	Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
-	SerialBT.begin("HEX-HEX FRUIT"); //Bluetooth device name
+	SerialBT.begin("HEX-HEX FRUIT TEST"); //Bluetooth device name
 	//Wire.begin();
 	p.begin();
-	pinMode(19, OUTPUT);
-	pinMode(32, OUTPUT);
-	digitalWrite(19, LOW);
-	digitalWrite(32, LOW);
-	
+	pinMode(light, OUTPUT);
+	digitalWrite(light, HIGH);
 	//mpu6050.begin();
 }
 

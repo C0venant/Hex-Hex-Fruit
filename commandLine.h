@@ -15,9 +15,12 @@
 //incoming signals
 #define balance 53
 #define reset 60
+#define toggleLight 62
 
 #define hexMode 31
 #define quadMode 30
+
+#define light 18
 
 
 class commandLine {
